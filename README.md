@@ -1,5 +1,7 @@
 # ID4-Carplay优化版
 
+**新增：[macOS / Windows 实车安装器](vehicle_installer/README.md)**。用 ENET / SSH 安装 JayJay 官方原始 NBT CarPlay 插件，包含安装前备份、校验和恢复。当前为实验版，尚未实车验证；需提前开通 SSH 并持有 root 密码。下载见 [v0.2.0 发布页](https://github.com/ch549235962/ID4-Carplay-Optimized/releases/tag/v0.2.0)。以下内容介绍原有本地模拟环境优化。
+
 面向 **原始 BMW HU_NBT / QNX 6.5 x86 本地模拟环境**的 CarPlay 显示、启动和恢复优化。项目名称中的 ID4 对应老款 NBT 的分类；当前验证固件为 `HU_NBT 003_009_004`，不适用于 NBT Evo ID5/ID6。
 
 视频在 QNX 内解码和提交显示；MacPlay 在 Mac 上处理手机协议、音频及物理连接。当前项目没有把完整 CarPlay 协议栈迁入 QNX，也没有向真实车机刷机。

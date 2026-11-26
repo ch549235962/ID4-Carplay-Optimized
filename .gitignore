@@ -23,3 +23,7 @@ service-intent.json
 receiver.pid
 supervisor.pid
 commands.fifo
+.venv*/
+dist/
+*.spec
+vehicle_installer/assets/

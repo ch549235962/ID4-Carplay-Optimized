@@ -1,0 +1,199 @@
+{
+  "repository": "JayJay3071/nbt-android-auto",
+  "release": "v2026.11.24.2",
+  "version": "2026.11.24.2",
+  "asset": "NBT-AndroidAuto-Python-2026.11.24.2.zip",
+  "sha256": "d5017d1224acc8f7c95308566ea4c35ed91d98479584df638ac2be8b1acb9709",
+  "url": "https://github.com/JayJay3071/nbt-android-auto/releases/download/v2026.11.24.2/NBT-AndroidAuto-Python-2026.11.24.2.zip",
+  "files": [
+    {
+      "source": "rt/native_service",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/native_service",
+      "mode": "700",
+      "size": 35732,
+      "sha256": "91f58fbb33d1abf832093c81ebc94da3ce31852d8b2d274df7d24ade770a7323"
+    },
+    {
+      "source": "rt/oneplus_native",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/oneplus_native",
+      "mode": "700",
+      "size": 991909,
+      "sha256": "68328653d2a18709b31fa279f3aaa475027aa84b135d01efc870304df9979108"
+    },
+    {
+      "source": "rt/nbt_knob",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_knob",
+      "mode": "700",
+      "size": 68751,
+      "sha256": "8890138837dfbe5ccfd19d31819824560e886b84950d4bbe107caac160593eb0"
+    },
+    {
+      "source": "rt/nbt_hwvideo",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_hwvideo",
+      "mode": "700",
+      "size": 53258,
+      "sha256": "d576e7ecf5e617454baf4fb503adbb7c6285e964a1e93c0e47a3fa7bf9011e80"
+    },
+    {
+      "source": "rt/decode_runner",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/decode_runner",
+      "mode": "700",
+      "size": 8325,
+      "sha256": "04d74e0aca5236c4601d401aecdc79e57e05b6c38bd87b2f215ae05c3c34190a"
+    },
+    {
+      "source": "rt/nbt_cluster",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_cluster",
+      "mode": "700",
+      "size": 104188,
+      "sha256": "4e26f7da8b3a6f8206ccd057ec09c3521e4a353cff77adbc2032802199f9a79f"
+    },
+    {
+      "source": "rt/accessory_window",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/accessory_window",
+      "mode": "700",
+      "size": 13558,
+      "sha256": "0e87bf91d367f15cec86bc6977ceb46693259f985816bb4ddbedb4bc61e3c322"
+    },
+    {
+      "source": "rt/fifo_http",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/fifo_http",
+      "mode": "700",
+      "size": 13795,
+      "sha256": "177e37319e5cadbc88b7a1308f7788e1c7a084a1777c1440102736d4d3f04f18"
+    },
+    {
+      "source": "rt/cert.pem",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/cert.pem",
+      "mode": "600",
+      "size": 1188,
+      "sha256": "9c5a28e2c9bf29572f398f717c1f9731b515886de26b448b5ebf3fb063d21f2d"
+    },
+    {
+      "source": "rt/key.pem",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/key.pem",
+      "mode": "600",
+      "size": 1704,
+      "sha256": "6c3c85ee783f9ca1a0c792147927e1f211d04c9916324d21b5bf9919ca8ab681"
+    },
+    {
+      "source": "rt/ca.pem",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/ca.pem",
+      "mode": "600",
+      "size": 1285,
+      "sha256": "69550db8421dcd8c71d100fa4deabf8cc9effc0633f2b51e0101e8593a4a0cb5"
+    },
+    {
+      "source": "rt/boot.sh",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/boot.sh",
+      "mode": "700",
+      "size": 12789,
+      "sha256": "93d74ad37e5a5c549c00519e35ad64256b760aa5affc7c977011c8b20923a009"
+    },
+    {
+      "source": "rt/restart.sh",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/restart.sh",
+      "mode": "700",
+      "size": 2166,
+      "sha256": "8362fbf073d3a8db79b7211f5ce023c750170adea4ec69051fe27ebfd14196d6"
+    },
+    {
+      "source": "rt/nbt_aa_wms",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_aa_wms",
+      "mode": "700",
+      "size": 18543,
+      "sha256": "9311c792576c449b95332ba02a4af7417ca359fad60dd66128da848f26b49006"
+    },
+    {
+      "source": "rt/nbt_ipod_tap",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_ipod_tap",
+      "mode": "700",
+      "size": 27828,
+      "sha256": "5612333325dedcd0ac0fc400ff4b133b2e164d968662f31e7bc3660b0813d829"
+    },
+    {
+      "source": "rt/nbt_aa_ipod",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_aa_ipod",
+      "mode": "700",
+      "size": 30108,
+      "sha256": "d1e5c13ede5e03f5ba4e8d7c6ff8f51ff912c771f921f8fd6dcad7083d0512a9"
+    },
+    {
+      "source": "rt/iap.sh",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/iap.sh",
+      "mode": "700",
+      "size": 2904,
+      "sha256": "b6e68ec609bbce8531f3660920c097129c3ccad14ef1a42fbf9f2dd9c9c172a5"
+    },
+    {
+      "source": "rt/nbt_decoder",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_decoder",
+      "mode": "700",
+      "size": 2838485,
+      "sha256": "d83630bb1ce3abdfe5ddc6224038ee8437fe87319e629d6a4e77272d0407b4e6"
+    },
+    {
+      "source": "rt/nbt_carplay",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_carplay",
+      "mode": "700",
+      "size": 1141753,
+      "sha256": "251e9a706da57f68fbf8354c1265fc32ff3a5250f7b9523b365249643bed4b4d"
+    },
+    {
+      "source": "rt/nbt_reset",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_reset",
+      "mode": "700",
+      "size": 9697,
+      "sha256": "850cc6f455eb202b1ae750a16f366e4cf2876e791c9bf8d4d22af865cd52aeb4"
+    },
+    {
+      "source": "rt/PERMISSION-valinet-binary-releases.txt",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/PERMISSION-valinet-binary-releases.txt",
+      "mode": "644",
+      "size": 1540,
+      "sha256": "80e2c3a6128392362739733db13074e7d98c3c3ec025aae36c8bbb121b41b9ea"
+    },
+    {
+      "source": "rt/mfl.map",
+      "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/mfl.map",
+      "mode": "644",
+      "size": 848,
+      "sha256": "8757462a123f2e24b5395c61a0be9027c75a482e52342cf2a3ab7e120fee00a8"
+    },
+    {
+      "source": "plugin/libNbtAndroidAuto.so",
+      "target": "/var/opt/hmi/data/rw/Plugins/NbtAndroidAuto/libNbtAndroidAuto.so",
+      "mode": "755",
+      "size": 25497,
+      "sha256": "bb1e08967044de0e5ff4a3b78d930331fc15b8c1d45bb329803cf72102339daf"
+    },
+    {
+      "source": "plugin/NbtAndroidAuto.xml",
+      "target": "/var/opt/hmi/data/rw/Plugins/NbtAndroidAuto/NbtAndroidAuto.xml",
+      "mode": "644",
+      "size": 23822,
+      "sha256": "9166e551a7b48af70e816e28623a207c97f2d1252ac99ecefdaed8964bb791fa"
+    },
+    {
+      "source": "plugin/NbtAndroidAuto_ALL_Texts.zip",
+      "target": "/var/opt/hmi/data/rw/Plugins/NbtAndroidAuto/NbtAndroidAuto_ALL_Texts.zip",
+      "mode": "644",
+      "size": 4189,
+      "sha256": "531ab8fff9d63e09dcea454099a6a5b015150f25bc96fe95f6f3e5fe39cee5fb"
+    },
+    {
+      "source": "plugin/NbtAndroidAuto_ALL_Images.zip",
+      "target": "/var/opt/hmi/data/rw/Plugins/NbtAndroidAuto/NbtAndroidAuto_ALL_Images.zip",
+      "mode": "644",
+      "size": 22,
+      "sha256": "8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85"
+    },
+    {
+      "source": "plugin/NbtAndroidAuto.manifest",
+      "target": "/var/opt/hmi/data/rw/Plugins/NbtAndroidAuto/NbtAndroidAuto.manifest",
+      "mode": "644",
+      "size": 718,
+      "sha256": "6b5932b8eaf1786bf0de7e60d5e132584a666e78d202ed13b87d9decf06a1263"
+    }
+  ]
+}

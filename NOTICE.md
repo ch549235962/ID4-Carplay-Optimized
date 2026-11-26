@@ -8,4 +8,8 @@ The source authored for this project is provided under GPL-3.0-only; see LICENSE
 - BMW firmware, BMW libraries, QNX SDK/runtime components and locally provisioned authentication or SSH keys are external prerequisites and are not part of this distribution.
 - FFmpeg is an external dependency for QNX decoding; use the pinned upstream build workflow in your existing authorized development environment and retain its applicable notices when distributing binaries. No FFmpeg binaries are included here.
 
-This project describes and tests a local emulator integration. It is not a BMW firmware release or a completed native QNX CarPlay protocol implementation.
+The runtime and integration directories describe and test a local emulator integration. They are not a BMW firmware release or a completed native QNX CarPlay protocol implementation.
+
+The separate `vehicle_installer` is an original GPL-3.0-only desktop installer. It downloads, verifies and installs the unmodified JayJay3071 official vehicle package at runtime, under that package's own license and additional permissions. The upstream release binaries are not redistributed in this repository or embedded in our application. See https://github.com/JayJay3071/nbt-android-auto/blob/master/NOTICE.md and the pinned release page linked in the installer documentation. The installer itself has not been validated on a real vehicle.
+
+Packaged desktop installers include Python (PSF license), Tcl/Tk (Tcl/Tk licenses), Paramiko (LGPL-2.1), cryptography (Apache-2.0 or BSD-3-Clause), bcrypt and PyNaCl (Apache-2.0), CFFI (MIT), certifi (MPL-2.0) and the PyInstaller bootloader (GPL-2.0 with the bootloader exception). Dependency metadata and available license files are copied into the application; upstream source is available through each dependency's package project links. Build requirements are in `vehicle_installer/requirements-build.txt`.
