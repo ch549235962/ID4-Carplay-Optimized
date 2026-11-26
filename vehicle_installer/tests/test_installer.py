@@ -153,7 +153,7 @@ class InstallationTests(unittest.TestCase):
         meta=json.loads((folder/'backup.json').read_text(encoding='utf-8'));meta['files'][0]['sha256']='0'*64
         (folder/'backup.json').write_text(json.dumps(meta),encoding='utf-8')
         with self.assertRaisesRegex(InstallError,'校验失败'):Snapshot.read(folder,self.car.fingerprint)
-    @unittest.skipIf(os.name=='nt','Windows msvcrt locks are covered by native packaged smoke tests')
+    @unittest.skipIf(os.name=='nt','This test checks POSIX flock; Windows uses msvcrt locking')
     def test_two_instances_cannot_mutate_together(self):
         self.local.mkdir()
         with local_lock(self.local):
@@ -187,6 +187,9 @@ class PayloadTests(unittest.TestCase):
             self.assertEqual(Package.read(file,lock).entries[0].data,data)
             file.write_bytes(file.read_bytes()+b'changed')
             with self.assertRaisesRegex(InstallError,'校验失败'):Package.read(file,lock)
+            with file.open('wb') as output:output.truncate(17*1024*1024)
+            with patch.object(Path,'open',side_effect=AssertionError('Large package must not be read')):
+                with self.assertRaisesRegex(InstallError,'过大'):Package.read(file,lock)
     def test_forbidden_payload_target_even_if_manifest_matches(self):
         with tempfile.TemporaryDirectory() as folder:
             file=Path(folder)/'bad.zip';entry={'source':'runtime/file','target':'/etc/passwd','mode':'700','size':1,'sha256':hashlib.sha256(b'x').hexdigest()}

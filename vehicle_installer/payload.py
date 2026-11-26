@@ -43,7 +43,9 @@ class Package:
 
     @classmethod
     def read(cls,file:Path,lock=None):
-        lock=lock or load_lock();raw=file.read_bytes()
+        lock=lock or load_lock()
+        if file.stat().st_size>16*1024*1024:raise InstallError('安装包过大。请选择指定的约 2 MB 官方插件 ZIP，不要选择整车固件包。')
+        with file.open('rb') as source:raw=source.read(16*1024*1024+1)
         if len(raw)>16*1024*1024 or digest(raw)!=lock['sha256']:raise InstallError('安装包校验失败，请重新下载指定的官方版本。')
         with zipfile.ZipFile(file) as archive:
             members=archive.infolist()
