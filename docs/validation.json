@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-26",
+  "scope": "local original HU_NBT QNX 6.5 x86 emulator",
+  "ram_mib": 512,
+  "vcpus": 1,
+  "display_average_fps": 25.46,
+  "http_frame_sample_fps": 28.33,
+  "cold_start_phase_seconds": {
+    "service_start_return": 1.373,
+    "receiver_ready": 1.398,
+    "phone_connected": 3.666,
+    "native_hid_ready": 9.426,
+    "idrive_ready": 32.252,
+    "first_qnx_decoded": 35.864,
+    "first_qnx_displayed": 38.081
+  },
+  "recovery": {
+    "decoder_recovery_seconds": 6.348,
+    "decoder_failure_preserved_phone_session": true,
+    "receiver_recovery_seconds": 5.385,
+    "vm_pid_preserved": true,
+    "supervisor_running": true,
+    "phone_reconnected": true
+  },
+  "wireless_video_verified": false,
+  "wireless_test": "deferred by user; USB retained"
+}

@@ -1,0 +1,163 @@
+<style>
+#fps-strip{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;font-size:13px}.fps-metric{background:#181c24;border:1px solid #343d4c;border-radius:8px;padding:8px 12px;white-space:nowrap}.fps-metric strong{color:#8cdaac;font-variant-numeric:tabular-nums;font-size:17px;margin-left:7px}#fps-connection{color:#adb9cd;font-size:12px}
+#load-panel{text-align:left;background:#181c24;border:1px solid #343d4c;border-radius:12px;margin:20px 0;padding:20px}#load-panel h3{margin:0 0 14px}.load-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}.load-card{padding:14px;background:#232a36;border-radius:8px}.load-card small{display:block;color:#adb9cd}.load-card strong{font-size:25px;display:block;margin-top:8px}.load-caption{font-size:13px;color:#adb9cd;line-height:1.7}#cpu-history{height:100px;width:100%;margin-top:12px}#load-config{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}#ram-preset{padding:9px;background:#252b36;color:#fff;border:1px solid #586274;border-radius:6px}#load-state{color:#8cdaac;font-size:13px}
+</style>
+<section id="load-panel"><h3>运行负载 <span id="load-state">正在读取…</span></h3>
+<div id="fps-strip" aria-live="polite"><span class="fps-metric">视频接收<strong id="video-receive-fps">— fps</strong></span><span class="fps-metric">QNX 解码<strong id="video-decode-fps">— fps</strong></span><span class="fps-metric">QNX 显示<strong id="video-display-fps">— fps</strong></span><span id="fps-connection">正在读取视频统计…</span></div>
+<div class="load-cards">
+<div class="load-card"><small>QEMU CPU · Mac 侧</small><strong id="qemu-cpu">—</strong></div>
+<div class="load-card"><small>QEMU 常驻内存 · Mac 侧</small><strong id="qemu-ram">—</strong></div>
+<div class="load-card"><small>图形渲染器 CPU · Mac 侧</small><strong id="renderer-cpu">—</strong></div>
+
+<div class="load-card"><small>QNX 内部 CPU / HMI CPU</small><strong id="guest-cpu">等待采样</strong></div>
+<div class="load-card"><small>QNX 可用 / 总内存</small><strong id="guest-ram">等待采样</strong></div>
+</div>
+<p class="load-caption" id="video-frame-detail">正在读取视频帧计数…</p>
+<div class="load-caption">帧率按电脑实际经过的时间计算。静止画面的视频帧率可能降到 0；显示帧率包含重复呈现的画面。</div>
+<canvas id="cpu-history" width="1200" height="100" aria-label="Mac 侧 QEMU CPU 最近 60 秒曲线"></canvas>
+<div class="load-caption">蓝线：Mac 侧 QEMU CPU，100% 表示占用一个 Mac 核心。内存为 macOS RSS；QNX 内部负载另行采样。</div>
+<div id="load-config"><span id="running-config">读取虚拟机配置…</span></div>
+<p class="load-caption" id="guest-sampling">QNX 采样等待中。</p>
+<p class="load-caption">软件模拟器的负载和帧率用于本机对比，不能直接代表真实车机性能。</p>
+</section>
+<script>
+(()=>{const byId=id=>document.getElementById(id),history=[];const percent=x=>Number.isFinite(x)?x.toFixed(1)+'%':'—';
+const fps=x=>Number.isFinite(x)?x.toFixed(1)+' fps':'— fps';byId('c').before(byId('fps-strip'));
+async function pollLoad(){try{const response=await fetch('/metrics');if(!response.ok)throw Error();const m=await response.json(),q=(m.processes||[]).find(x=>x.name==='QEMU'),r=(m.processes||[]).find(x=>x.name==='图形渲染器'),c=m.configuration,g=m.guest;
+byId('qemu-cpu').textContent=percent(q?.cpu_pct);byId('qemu-ram').textContent=q?q.rss_mib.toFixed(1)+' MiB':'—';byId('renderer-cpu').textContent=percent(r?.cpu_pct);byId('load-state').textContent=q?'每秒更新':'等待虚拟机';
+const v=m.renderer?.source==='qnx_native_video'?m.renderer:null;
+byId('video-receive-fps').textContent=fps(v?.fps?.received);byId('video-decode-fps').textContent=fps(v?.fps?.decoded);byId('video-display-fps').textContent=fps(v?.fps?.displayed);
+byId('fps-connection').textContent=!v?'等待视频统计':v.phone_session_active===true?(v.ready?'CarPlay 已连接':'视频已连接 · 等待 QNX 统计'):v.phone_session_active===false?'视频会话未连接':'等待接收端';
+byId('video-frame-detail').textContent=v?'累计接收 '+v.received_frames+' 帧 · QNX 解码 '+v.decoded_frames+' 帧 · 显示 '+v.presented_frames+' 次 · 解码错误 '+(v.decode_errors??'—')+' · 显示错误 '+(v.display_errors??'—')+' · 丢帧 '+(v.dropped_frames??'—'):'视频帧计数暂不可用；负载统计仍可查看。';
+if(c){byId('running-config').textContent='当前：'+c.vcpus+' vCPU · '+c.ram_mib+' MiB · '+c.cpu_model}
+byId('guest-cpu').textContent=g?.cpu_valid?percent(g.cpu_pct)+' / '+percent(g.hmi_cpu_pct):'等待有效采样';byId('guest-ram').textContent=g?.ram_valid?(g.ram_free_bytes/1048576).toFixed(0)+' / '+(g.ram_total_bytes/1048576).toFixed(0)+' MiB':'等待采样';byId('guest-sampling').textContent=g?'QNX 样本年龄 '+g.age_seconds+' 秒 · HMI '+g.hmi_threads+' 线程 · 采样进程 CPU '+percent(g.cpu_valid?g.monitor_cpu_pct:null)+(Number.isFinite(m.guest_time_ratio)?' · 虚拟时间推进约 '+m.guest_time_ratio.toFixed(3)+'×':''):'当前还没有 QNX 内部样本；上方 Mac 侧数据仍可查看。';
+history.push(q?.cpu_pct??null);if(history.length>60)history.shift();const canvas=byId('cpu-history'),x=canvas.getContext('2d');x.clearRect(0,0,1200,100);x.strokeStyle='#394252';for(let y of [10,50,90]){x.beginPath();x.moveTo(0,y);x.lineTo(1200,y);x.stroke()}x.strokeStyle='#6fb8ff';x.lineWidth=2;x.beginPath();history.forEach((v,i)=>{if(v!==null){let px=i*1200/59,py=90-Math.min(v,100)*.8;i?x.lineTo(px,py):x.moveTo(px,py)}});x.stroke();
+}catch(e){byId('load-state').textContent='重新连接监控…'}setTimeout(pollLoad,1000)}pollLoad();})();
+</script>
+<style>
+#drive-controls{max-width:760px;margin:8px auto 18px;padding:16px;border:1px solid #343d4c;border-radius:12px;background:#171a20}#drive-top{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;font-size:14px}#input-target{background:#252b36;border:1px solid #586274;border-radius:6px;color:#fff;padding:7px 12px}#input-state{color:#a7c7b1;font-size:13px;min-width:170px}#drive-layout{display:grid;grid-template-columns:1fr 176px 1fr;align-items:center;gap:14px;max-width:510px;margin:16px auto 8px}.drive-side{display:flex;flex-direction:column;align-items:center;gap:6px}.drive-side button{padding:9px 14px;min-width:92px;font-size:14px}#drive-dial{position:relative;width:176px;height:176px;user-select:none;touch-action:none}#dial-ring{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#262a31 43%,#14161a 44%,#30343a 63%,#96999b 65%,#32363c 69%,#0c0d0f 72%);box-shadow:0 6px 12px #0009,inset 0 1px 2px #c4c7ca;cursor:grab;outline-offset:4px;touch-action:none}#dial-ring:active{cursor:grabbing}#dial-index{position:absolute;inset:9px;border-radius:50%;pointer-events:none}#dial-index:before{content:'';position:absolute;top:0;left:calc(50% - 2px);width:4px;height:10px;border-radius:2px;background:#edb373;box-shadow:0 0 6px #e68a46}#drive-dial button{margin:0;padding:0;position:absolute;border:0;line-height:1;cursor:pointer;z-index:2}#dial-center{width:72px;height:72px;left:52px;top:52px;border-radius:50%;background:radial-gradient(circle at 40% 25%,#52575d,#26292e 65%,#15171b);box-shadow:inset 0 0 0 2px #76797c,0 2px 5px #0009;font-size:16px}#dial-center:active{background:#785236;box-shadow:inset 0 0 0 2px #d6aa77}.dial-tilt{width:32px;height:28px;border-radius:7px;background:#181a1ecc;color:#c4c9cf;font-size:13px}.dial-tilt:active{color:#efb77c;background:#433224}.dial-up{left:72px;top:16px}.dial-down{left:72px;bottom:16px}.dial-left{left:15px;top:74px}.dial-right{right:15px;top:74px}.drive-hint{color:#a9b3c3;font-size:12px;line-height:1.7;margin:0}body[data-control-mode="carplay"] #keys{display:none}#drive-controls button:disabled{opacity:.35;cursor:default}
+@media(max-width:480px){#drive-controls{padding:12px 6px}#drive-layout{gap:3px;grid-template-columns:1fr 176px 1fr}.drive-side button{font-size:12px;min-width:65px;padding:8px}}
+</style>
+<section id="drive-controls" aria-label="车机操作">
+<div id="drive-top"><label>控制目标 <select id="input-target"><option value="carplay">CarPlay</option><option value="nbt">原厂 NBT</option></select></label><span id="input-state" role="status">正在连接控制通道…</span></div>
+<div id="drive-layout">
+<div class="drive-side"><button data-drive="menu">主菜单</button><button data-drive="back">返回</button></div>
+<div id="drive-dial" role="group" aria-label="虚拟 iDrive 旋钮">
+<div id="dial-ring" tabindex="0" role="slider" aria-label="旋转选择，上下方向键旋转，Enter确认" aria-valuemin="-360" aria-valuemax="360" aria-valuenow="0"><div id="dial-index"></div></div>
+<button id="dial-center" data-drive="select" aria-label="按下旋钮确认">确认</button>
+<button class="dial-tilt dial-up" data-drive="tilt_up" aria-label="向上倾斜旋钮">▲</button><button class="dial-tilt dial-down" data-drive="tilt_down" aria-label="向下倾斜旋钮">▼</button><button class="dial-tilt dial-left" data-drive="tilt_left" aria-label="向左倾斜旋钮">◀</button><button class="dial-tilt dial-right" data-drive="tilt_right" aria-label="向右倾斜旋钮">▶</button>
+</div>
+<div class="drive-side"><button data-drive="rotate" data-steps="-1">↶ 左转</button><button data-drive="rotate" data-steps="1">右转 ↷</button></div>
+</div>
+<p class="drive-hint">拖动外环或使用滚轮旋转 · 按中央确认 · 四个小箭头控制倾斜</p>
+<p class="drive-hint" id="drive-touch-hint">CarPlay 模式下可以直接点击、拖动上方画面。</p>
+</section>
+<script>
+(()=>{
+ const $=id=>document.getElementById(id),relay='http://127.0.0.1:8877',screen=$('c'),ring=$('dial-ring');
+ $('keys').before($('drive-controls'));
+ const oldHelp=$('keys').nextElementSibling,oldHelpText=oldHelp?.textContent;
+ let mode='carplay',ready=false,switching=false,queue=Promise.resolve(),rotation=0,drag=null,wheelTotal=0;
+ const pointers=new Map();let touchFlush=0;
+ const inputState=text=>{$('input-state').textContent=text;};
+ function post(route,body,nbt=false){
+  const operation=queue.then(async()=>{
+   const response=await fetch(nbt?'/action':relay+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+   const result=await response.json();if(!response.ok)throw Error(result.error||'操作发送失败');return result;
+  });queue=operation.catch(()=>{});return operation;
+ }
+ function paintMode(){
+  document.body.dataset.controlMode=mode;
+  if(!switching)$('input-target').value=mode;
+  document.querySelectorAll('[data-drive]').forEach(b=>b.disabled=switching||(mode==='carplay'&&!ready));
+  $('drive-touch-hint').textContent=mode==='carplay'?'可以直接点击、拖动上方的 CarPlay 画面。':'正在控制原厂 NBT，CarPlay 视频在后台继续接收。';
+  if(oldHelp)oldHelp.textContent=mode==='carplay'?'上下键旋转 · 左右键倾斜 · Enter 确认 · Esc 返回 · M 主菜单':oldHelpText;
+ }
+ async function drive(action,steps){
+  if(switching)return;
+  try{
+   if(mode==='carplay'){
+    if(!ready)throw Error('CarPlay 控制通道连接中');
+    await post('/action',{action,...(steps===undefined?{}:{steps})});
+   }else{
+    if(action==='rotate'){
+     for(let i=0;i<Math.abs(steps);i++)await post('/action',{action:steps>0?'down':'up'},true);
+    }else await post('/action',{action:({tilt_up:'up',tilt_down:'down'})[action]||action},true);
+   }
+   inputState(mode==='carplay'?'CarPlay · 操作已发送':'原厂 NBT · 操作已发送');
+  }catch(error){inputState(error.message);}
+ }
+ function rotate(steps){
+  if(!steps||switching||(mode==='carplay'&&!ready))return;
+  steps=Math.max(-16,Math.min(16,steps));rotation+=steps*15;
+  $('dial-index').style.transform=`rotate(${rotation}deg)`;ring.setAttribute('aria-valuenow',String(Math.round(rotation%360)));
+  void drive('rotate',steps);
+ }
+ document.querySelectorAll('[data-drive]').forEach(button=>button.addEventListener('click',()=>{
+  if(button.dataset.drive==='rotate')rotate(Number(button.dataset.steps));else void drive(button.dataset.drive);
+ }));
+ function angle(event){const r=ring.getBoundingClientRect();return Math.atan2(event.clientY-r.top-r.height/2,event.clientX-r.left-r.width/2)*180/Math.PI;}
+ ring.addEventListener('pointerdown',event=>{
+  if(event.button!==0||switching||(mode==='carplay'&&!ready))return;
+  event.preventDefault();ring.focus({preventScroll:true});ring.setPointerCapture(event.pointerId);drag={id:event.pointerId,last:angle(event),remainder:0};
+ });
+ ring.addEventListener('pointermove',event=>{
+  if(!drag||event.pointerId!==drag.id)return;event.preventDefault();
+  const current=angle(event);let delta=current-drag.last;drag.last=current;
+  if(delta>180)delta-=360;if(delta< -180)delta+=360;drag.remainder+=delta;
+  const steps=Math.trunc(drag.remainder/15);if(steps){drag.remainder-=steps*15;rotate(steps);}
+ });
+ for(const name of ['pointerup','pointercancel','lostpointercapture'])ring.addEventListener(name,()=>{drag=null;});
+ $('drive-dial').addEventListener('wheel',event=>{
+  if(switching||(mode==='carplay'&&!ready))return;event.preventDefault();
+  wheelTotal+=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?100:1);
+  const steps=Math.trunc(wheelTotal/45);if(steps){wheelTotal-=steps*45;rotate(steps);}
+ },{passive:false});
+ document.addEventListener('keydown',event=>{
+  if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||event.target.closest?.('input,select,textarea,[contenteditable="true"]'))return;
+  if((event.key==='Enter'||event.key===' ')&&event.target.closest?.('button,a'))return;
+  if(mode!=='carplay'&&event.target!==ring)return;
+  const action={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'tilt_left',ArrowRight:'tilt_right',Enter:'select',Escape:'back',Backspace:'back',Home:'menu',m:'menu',M:'menu',F1:'menu'}[event.key];
+  if(action){event.preventDefault();event.stopImmediatePropagation();if(action==='up'||action==='down')rotate(action==='up'?-1:1);else void drive(action);}
+  else if(mode==='carplay'&&/^F[2-5]$/.test(event.key)){event.preventDefault();event.stopImmediatePropagation();}
+ },true);
+ function flushTouch(){
+  touchFlush=0;if(mode!=='carplay'||!ready||switching)return;
+  const contacts=[...pointers.values()].map(p=>({id:p.id,x:p.x,y:p.y,down:true}));
+  void post('/touch',{contacts}).catch(error=>inputState(error.message));
+ }
+ function touchPosition(event){const r=screen.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))};}
+ screen.style.touchAction='none';screen.tabIndex=0;
+ screen.addEventListener('pointerdown',event=>{
+  if(mode!=='carplay'||!ready||switching||pointers.size>=2||event.button!==0)return;
+  event.preventDefault();screen.focus({preventScroll:true});screen.setPointerCapture(event.pointerId);
+  const used=new Set([...pointers.values()].map(p=>p.id));pointers.set(event.pointerId,{id:used.has(0)?1:0,...touchPosition(event)});flushTouch();
+ });
+ screen.addEventListener('pointermove',event=>{
+  const p=pointers.get(event.pointerId);if(!p)return;event.preventDefault();Object.assign(p,touchPosition(event));
+  if(!touchFlush)touchFlush=requestAnimationFrame(flushTouch);
+ });
+ function release(event){if(!pointers.delete(event.pointerId))return;event.preventDefault();if(touchFlush){cancelAnimationFrame(touchFlush);touchFlush=0;}flushTouch();}
+ for(const name of ['pointerup','pointercancel','lostpointercapture'])screen.addEventListener(name,release);
+ function releaseAll(){
+  drag=null;if(touchFlush){cancelAnimationFrame(touchFlush);touchFlush=0;}
+  if(pointers.size&&mode==='carplay'){pointers.clear();void post('/touch',{contacts:[]}).catch(()=>{});}
+ }
+ window.addEventListener('blur',releaseAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();});
+ $('input-target').addEventListener('change',async()=>{
+  const target=$('input-target').value;switching=true;paintMode();
+  try{
+   if(mode==='carplay'&&pointers.size){pointers.clear();await post('/touch',{contacts:[]});}
+   const response=await post('/mode',{target});mode=response.mode;
+  }catch(error){inputState(error.message);}
+  finally{switching=false;paintMode();}
+ });
+ async function poll(){
+  try{const response=await fetch(relay+'/status',{cache:'no-store'});if(!response.ok)throw Error();const status=await response.json();ready=status.ready;
+   if(!switching){mode=status.mode;inputState(mode==='carplay'?(ready?'CarPlay 控制已连接':'等待 CarPlay 控制通道'):'原厂 NBT 控制');paintMode();}
+  }catch{ready=false;inputState('等待本机控制服务…');paintMode();}
+  setTimeout(poll,1500);
+ }
+ paintMode();poll();
+})();
+</script>

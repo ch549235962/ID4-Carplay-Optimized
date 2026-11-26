@@ -1,0 +1,46 @@
+{
+  "MacPlay-NBT": [
+    "tools/avc.cjs",
+    "tools/avc.test.cjs",
+    "tools/nbt_bridge.cjs",
+    "tools/prepare_engine.py",
+    "tools/macplay_nbt.py",
+    "tools/supervisor.py",
+    "tools/wireless_profile.py",
+    "tools/bridge_recovery.test.cjs",
+    "tools/verify_startup.py",
+    "tools/verify_recovery.py"
+  ],
+  "NBT-Launcher": [
+    "Launcher.m",
+    "Icon.m",
+    "build.py",
+    "controller.py"
+  ],
+  "CarPlay-QNX-Native": [
+    "src/native_decoder.c",
+    "src/native_overlay.c",
+    "src/native_video.h",
+    "src/native_video_ctl.c",
+    "src/native_hid.c",
+    "tools/build_native_video.py",
+    "tools/build_native_hid.py",
+    "tools/native_hid.py",
+    "tools/nbt_guest.py",
+    "tools/prepare_nbt_native.py",
+    "tools/verify_display_performance.py",
+    "tools/build_native_display_bridge.py",
+    "src/physical_texture.c"
+  ],
+  "NBT-Original": [
+    "tools/nbt_vm.py",
+    "tools/resources.py",
+    "tools/viewer.py",
+    "tools/load_metrics.py",
+    "tools/video_metrics.py",
+    "tools/native_hid_client.mjs",
+    "tools/monitor/panel.html",
+    "tools/compact_ifs.py",
+    "tools/probe_hardware.py"
+  ]
+}
