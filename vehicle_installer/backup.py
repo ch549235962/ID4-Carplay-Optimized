@@ -65,9 +65,13 @@ class Snapshot:
         return cls(folder,meta,data_files)
 
 def latest_snapshot(root:Path,fingerprint:str):
+    valid=[]
     if root.exists():
-        for folder in sorted(root.iterdir(),reverse=True):
+        for folder in root.iterdir():
             if not (folder/'backup.json').is_file():continue
-            try:return Snapshot.read(folder,fingerprint)
+            try:
+                snapshot=Snapshot.read(folder,fingerprint)
+                if isinstance(snapshot.metadata.get('created_at'),(int,float)):valid.append(snapshot)
             except (InstallError,ValueError,KeyError,OSError,zipfile.BadZipFile):continue
+    if valid:return max(valid,key=lambda s:s.metadata['created_at'])
     raise InstallError('本机没有属于当前车机的完整备份。请使用之前安装时的电脑或备份目录。')

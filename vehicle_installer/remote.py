@@ -147,6 +147,14 @@ done; }; walk '''+quote(root)
     def release(self,token):
         if self.exists(CONTROL+'/lock/owner') and self.read(CONTROL+'/lock/owner').decode()==token:
             self.run('rm -f '+quote(CONTROL+'/lock/owner')+'; rmdir '+quote(CONTROL+'/lock'),check=False)
+    def handover(self,previous,token):
+        if not all(re.fullmatch('[0-9a-f]{32}',value) for value in (previous,token)):raise InstallError('恢复事务标识无效。')
+        lock=CONTROL+'/lock'
+        # Keep a continuously held lock while recovery takes ownership.
+        command='set -e\nmkdir '+quote(lock+'/transfer')+'\ntrap '+quote('rmdir '+quote(lock+'/transfer'))+' 0\n'
+        command+='test "$(cat '+quote(lock+'/owner')+')" = '+quote(previous)+'\n'
+        command+='printf %s '+quote(token)+' > '+quote(lock+'/owner.next')+'\nmv '+quote(lock+'/owner.next')+' '+quote(lock+'/owner')
+        self.run(command)
     def exec_script(self,path):
         if not path.startswith(CONTROL+'/') or not writable(path):raise InstallError('事务脚本路径无效。')
         return self.run('sh '+quote(path),timeout=120)

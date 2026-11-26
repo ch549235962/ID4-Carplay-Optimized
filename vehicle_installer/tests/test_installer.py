@@ -53,7 +53,7 @@ class Sandbox(Remote):
         source=self.read(path).decode().replace(RW,self.path(RW).as_posix())
         if path.endswith('/activate.sh') and self.fail_move:
             source=source.replace('set -eu','set -eu\n_count=0\nmv(){ _count=$((_count+1)); if test "$_count" = '+str(self.fail_move)+'; then return 1; fi; command mv "$@"; }',1)
-        script=self.path(path).with_name('sandbox-run.sh');script.write_text(source)
+        script=self.path(path).with_name('sandbox-run.sh');script.write_text(source,newline='\n')
         result=subprocess.run([SHELL,script.as_posix()],capture_output=True,timeout=15)
         if path.endswith('/activate.sh') and self.disconnect:
             self.online=False;raise InstallError('test connection lost after remote activation')
@@ -126,6 +126,13 @@ class InstallationTests(unittest.TestCase):
         before=list(self.car.path(RW).iterdir())
         result=self.installer().check(self.car.host,'TEST-PASSWORD')
         self.assertIn('尚未安装',result['message']);self.assertEqual(before,list(self.car.path(RW).iterdir()))
+    def test_recovery_itself_interrupted_still_uses_original_snapshot(self):
+        self.old();self.car.disconnect=True
+        with self.assertRaises(InstallError):self.install()
+        self.car.online=True
+        with self.assertRaises(InstallError):self.install(restore=True)
+        self.car.online=True;self.car.disconnect=False
+        self.install(restore=True);self.assert_old()
     def test_no_space_prevents_writes(self):
         self.car.free_bytes=lambda:1024
         with self.assertRaisesRegex(InstallError,'空间不足'):self.install()
@@ -157,7 +164,11 @@ class InstallationTests(unittest.TestCase):
         with self.assertRaises(InstallError):self.install()
         self.car.online=True;self.car.disconnect=False
         token=self.car.read(CONTROL+'/lock/owner').decode()
-        self.car.put(str(os.getpid()).encode(),CONTROL+'/'+token+'/pid')
+        # A shell's own PID also works under Windows Git Bash's PID namespace.
+        pid=self.car.run('echo $$')[1].strip()
+        self.car.put(pid,CONTROL+'/'+token+'/pid')
+        original_run=self.car.run
+        self.car.run=lambda command,**kwargs:(0,b'',b'') if command.startswith('kill -0 ') else original_run(command,**kwargs)
         with self.assertRaisesRegex(InstallError,'仍在运行'):self.install(restore=True)
 
 

@@ -75,9 +75,10 @@ class Installer:
             remote, identity = self.connect(host, password, port)
             try:
                 source = latest_snapshot(self.root/'backups', identity['fingerprint']) if restore else None
+                pending_owner = None
                 if remote.exists(CONTROL+'/lock'):
                     if not restore: raise InstallError('有上次未完成的操作。请先使用“恢复上次安装前备份”，不要重复安装。')
-                    source = self.pending_snapshot(remote, identity)
+                    source, pending_owner = self.pending_snapshot(remote, identity)
                 existing = {root: remote.exists(root) for root in (RT, PLUGIN)}
                 # Enumerate first to reject symbolic links or special files before any mutation.
                 listing = [item for root in (RT, PLUGIN) for item in remote.walk(root)]
@@ -89,12 +90,10 @@ class Installer:
                 self.progress('正在创建安装前备份', .12)
                 backup = Snapshot.create(remote, self.root/'backups', identity, token,
                     lambda title, fraction: self.progress(title, .12+.12*fraction))
-                if restore and remote.exists(CONTROL+'/lock'):
-                    # pending_snapshot already proved ownership, inactivity, and a complete matching backup.
-                    remote.release(source.metadata['transaction'])
                 tx = CONTROL+'/'+token
                 wanted = source.metadata['existing'] if restore else {RT: True, PLUGIN: True}
                 state = {'schema': 1, 'token': token, 'identity': identity, 'backup': str(backup.directory),
+                         'recovery_snapshot': source.metadata['transaction'] if restore else token,
                          'existing': existing, 'wanted': wanted, 'phase': 'staging', 'created_at': time.time()}
                 local_state = self.root/'operations'/(token+'.json')
                 activation_started = False
@@ -103,7 +102,8 @@ class Installer:
                 try:
                     remote.mkdir(tx)
                     self.state(remote, tx, state, local_state)
-                    remote.acquire(token)
+                    if pending_owner: remote.handover(pending_owner, token)
+                    else: remote.acquire(token)
                     acquired = True
                     remote.quiet_services()
                     remote.run('test -d '+q(RW+'/Plugins')+' || mkdir '+q(RW+'/Plugins'))
@@ -213,6 +213,8 @@ class Installer:
         state = json.loads(remote.read(tx+'/state.json', 32768))
         if state.get('identity',{}).get('fingerprint') != identity['fingerprint'] or state.get('token') != token:
             raise InstallError('上次事务身份不匹配，未恢复。')
+        source_token = state.get('recovery_snapshot', token)
+        if not re.fullmatch('[0-9a-f]{32}',source_token):raise InstallError('上次恢复备份记录异常。')
         if remote.exists(tx+'/pid'):
             pid = remote.read(tx+'/pid', 1024).decode().strip()
             if not pid.isdigit() or remote.run('kill -0 '+pid, check=False)[0] == 0:
@@ -220,6 +222,6 @@ class Installer:
         for folder in (self.root/'backups').iterdir():
             try:
                 backup = Snapshot.read(folder, identity['fingerprint'])
-                if backup.metadata['transaction'] == token: return backup
+                if backup.metadata['transaction'] == source_token: return backup, token
             except (OSError, ValueError, KeyError, InstallError): continue
         raise InstallError('当前电脑没有上次事务对应的完整备份，不能自动恢复。请使用原安装电脑。')
