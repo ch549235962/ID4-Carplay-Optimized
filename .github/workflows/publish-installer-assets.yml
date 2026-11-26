@@ -31,7 +31,7 @@ jobs:
           assert re.fullmatch(r'[0-9]+',run_id) and re.fullmatch(r'v[0-9][A-Za-z0-9._-]*',tag)
           def api(path):return json.loads(subprocess.check_output(['gh','api',path]))
           run=api(f'repos/{repo}/actions/runs/{run_id}')
-          release=api(f'repos/{repo}/releases/tags/{tag}')
+          release=next(r for r in api(f'repos/{repo}/releases?per_page=100') if r['tag_name']==tag)
           assert run['name']=='Build vehicle installer' and run['conclusion']=='success'
           assert run['head_repository']['full_name']==repo and run['head_branch']=='main'
           assert release['draft'] is True and release['target_commitish']==run['head_sha']
@@ -48,5 +48,12 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           cd installer
-          sha256sum --check windows-SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          expected=Path('windows-SHA256SUMS.txt').read_text(encoding='utf-8-sig').split()[0]
+          assert hashlib.sha256(Path('ID4-CarPlay-Installer.exe').read_bytes()).hexdigest()==expected
+          report=json.loads(Path('windows-selftest.json').read_text(encoding='utf-8-sig'))
+          assert report['ok'] is True and report['network_used'] is False and report['platform']=='win32'
+          PY
           gh release upload "$RELEASE_TAG" ID4-CarPlay-Installer.exe windows-selftest.json --repo "$GITHUB_REPOSITORY"
