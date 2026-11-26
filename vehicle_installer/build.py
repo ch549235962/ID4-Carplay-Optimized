@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+import sysconfig
 from pathlib import Path
 from PIL import Image, ImageDraw
 
@@ -27,7 +28,13 @@ def main():
         command+=['--copy-metadata',dependency]
     command+=['--add-data',str(ROOT/'LICENSE')+os.pathsep+'licenses',
               '--add-data',str(ROOT/'NOTICE.md')+os.pathsep+'licenses',
-              '--add-data',str(ROOT/'vehicle_installer'/'README.md')+os.pathsep+'licenses']
+              '--add-data',str(ROOT/'vehicle_installer'/'README.md')+os.pathsep+'licenses',
+              '--add-data',str(ROOT/'vehicle_installer'/'licenses')+os.pathsep+'licenses/third-party']
+    candidates=[Path(sys.base_prefix)/'LICENSE.txt',Path(sysconfig.get_path('stdlib'))/'LICENSE.txt']
+    python_license=next((p for p in candidates if p.is_file()),None)
+    if not python_license:raise SystemExit('Missing Python distribution license; refusing to package.')
+    destination=assets/'Python-LICENSE.txt';shutil.copyfile(python_license,destination)
+    command+=['--add-data',str(destination)+os.pathsep+'licenses/third-party']
     if sys.platform=='darwin':
         command+=['--onedir','--osx-bundle-identifier','io.github.ch549235962.id4carplayinstaller']
     elif sys.platform=='win32':command+=['--onefile']

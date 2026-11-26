@@ -46,14 +46,14 @@ class Sandbox(Remote):
     def read(self,target,max_bytes=16*1024*1024):
         data=super().read(target,max_bytes)
         if self.corrupt and target==RT+'/nbt_carplay' and any(self.path(CONTROL).glob('*/phase')):
-            if any(p.read_text().strip()=='committed' for p in self.path(CONTROL).glob('*/phase')):
+            if any(p.read_text(encoding='utf-8').strip()=='committed' for p in self.path(CONTROL).glob('*/phase')):
                 self.corrupt=False;return b'corrupt'
         return data
     def exec_script(self,path):
         source=self.read(path).decode().replace(RW,self.path(RW).as_posix())
         if path.endswith('/activate.sh') and self.fail_move:
             source=source.replace('set -eu','set -eu\n_count=0\nmv(){ _count=$((_count+1)); if test "$_count" = '+str(self.fail_move)+'; then return 1; fi; command mv "$@"; }',1)
-        script=self.path(path).with_name('sandbox-run.sh');script.write_text(source,newline='\n')
+        script=self.path(path).with_name('sandbox-run.sh');script.write_text(source,encoding='utf-8',newline='\n')
         result=subprocess.run([SHELL,script.as_posix()],capture_output=True,timeout=15)
         if path.endswith('/activate.sh') and self.disconnect:
             self.online=False;raise InstallError('test connection lost after remote activation')
@@ -150,8 +150,8 @@ class InstallationTests(unittest.TestCase):
         self.old();self.install()
         folder=next((self.local/'backups').iterdir())
         with self.assertRaises(InstallError):Snapshot.read(folder,'SHA256:OTHER-CAR')
-        meta=json.loads((folder/'backup.json').read_text());meta['files'][0]['sha256']='0'*64
-        (folder/'backup.json').write_text(json.dumps(meta))
+        meta=json.loads((folder/'backup.json').read_text(encoding='utf-8'));meta['files'][0]['sha256']='0'*64
+        (folder/'backup.json').write_text(json.dumps(meta),encoding='utf-8')
         with self.assertRaisesRegex(InstallError,'校验失败'):Snapshot.read(folder,self.car.fingerprint)
     @unittest.skipIf(os.name=='nt','Windows msvcrt locks are covered by native packaged smoke tests')
     def test_two_instances_cannot_mutate_together(self):
@@ -241,7 +241,7 @@ class GatewayTests(unittest.TestCase):
     def test_no_os_shutdown_in_installation_code(self):
         folder=Path(__file__).parents[1]
         for name in ['engine.py','remote.py','transaction.py','gateway.py']:
-            self.assertNotIn('/sbin/shutdown',(folder/name).read_text())
+            self.assertNotIn('/sbin/shutdown',(folder/name).read_text(encoding='utf-8'))
 
 
 if __name__=='__main__':unittest.main()
