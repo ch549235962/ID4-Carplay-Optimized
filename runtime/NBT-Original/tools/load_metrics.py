@@ -23,6 +23,7 @@ class LoadMetrics:
     if name and valid[name] in command.lower():result['processes'].append({'name':name,'pid':pid,'cpu_pct':float(parts[1]),'rss_mib':round(int(parts[2])/1024,1),'elapsed':parts[3]})
   try:
    command=json.loads((R/'vm/command-active.json').read_text());result['configuration']={'ram_mib':int(command[command.index('-m')+1].removesuffix('M')),'vcpus':int(command[command.index('-smp')+1]),'cpu_model':command[command.index('-cpu')+1],'acceleration':command[command.index('-accel')+1],'frequency_matched_to_atom':False}
+   result['configuration']['clock_mode']='icount' if '-icount' in command else 'realtime'
   except (OSError,ValueError,KeyError):result['configuration']=None
   try:
    with (R/'logs/serial.log').open('rb') as f:f.seek(0,2);size=f.tell();f.seek(max(0,size-131072));tail=f.read().decode(errors='replace')

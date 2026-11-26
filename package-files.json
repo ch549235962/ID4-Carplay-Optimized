@@ -29,11 +29,13 @@
     "tools/nbt_guest.py",
     "tools/prepare_nbt_native.py",
     "tools/verify_display_performance.py",
+    "tools/verify_frame_rate.py",
     "tools/build_native_display_bridge.py",
     "src/physical_texture.c"
   ],
   "NBT-Original": [
     "tools/nbt_vm.py",
+    "tools/video_profile.py",
     "tools/resources.py",
     "tools/viewer.py",
     "tools/load_metrics.py",

@@ -63,9 +63,13 @@ def status():
                   phone_connected=bool(receiver.get('sessionActive')),
                   controller_ready=vm.get('controller_ready', False))
     result['supervisor_running']=bool(macplay_nbt.supervisor_running()) if macplay_backend() else False
+    guest=(http_json('http://127.0.0.1:8876/metrics').get('guest') or {}) if vm.get('language_profile')=='zh-CN-carplay-native' else None
+    result['hmi_running']=(bool(guest.get('hmi_threads',0)>0) if guest.get('age_seconds',999)<5 else None) if guest is not None else result['controller_ready']
+    result['hmi_health']='unknown' if result['hmi_running'] is None else ('running' if result['hmi_running'] else 'stopped')
+    result['controller_ready']=result['controller_ready'] and result['hmi_running'] is not False
     result['services_running'] = all(result[k] for k in [
         'vm_running', 'viewer_running', 'renderer_running', 'receiver_ready',
-        'video_bridge_running', 'controls_running', 'native_hid_ready', 'metrics_running'])
+        'video_bridge_running', 'controls_running', 'native_hid_ready', 'metrics_running']) and result['hmi_running'] is not False
     result['backend']=('MacPlay '+macplay_nbt.selected_mode()+' -> QNX') if macplay_backend() else 'PlayPort wireless -> QNX'
     return result
 

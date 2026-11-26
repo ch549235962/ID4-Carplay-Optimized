@@ -63,6 +63,32 @@ python3 /path/to/outputs/MacPlay-NBT/tools/macplay_nbt.py wireless-check
 
 准备测试时拔掉 iPhone USB，再点“无线 CarPlay 测试”；只有收到非 USB 接口上的真实手机视频才算无线通过。随时用“切回 USB”恢复有线。当前实测状态见 VALIDATION.md。
 
+## 帧率配置与 60 FPS 试验
+
+仅用于本地模拟器，不会更改实车安装包。先在桌面启动器点击“全部停止”，再执行：
+
+```sh
+python3 /path/to/outputs/NBT-Original/tools/video_profile.py --fps 60
+```
+
+随后点击“全部开启”，并刷新已打开的 NBT 网页。该模式向手机请求 60 FPS，将网页取帧间隔改为约 16.7 ms；CPU 仍为 `qemu32` / 1 vCPU、内存仍为 512 MiB，保留原先的固定 `icount` 时钟。
+
+**该 60 FPS 模式尚未通过稳定性验证，不作为默认配置。** 2026-11-27 的尝试未实现稳定 60 FPS，当前本机已回退到 30 FPS 请求，见验证记录。静止页面会减少视频帧，网页取帧频率也不等于显示器刷新率。
+
+恢复默认帧率：先点击“全部停止”，执行下列命令，再开启服务：
+
+```sh
+python3 /path/to/outputs/NBT-Original/tools/video_profile.py --fps 30
+```
+
+用持续画面变化测量实际速率（`--drive` 会往返旋转焦点，不进行选择）：
+
+```sh
+python3 /path/to/outputs/CarPlay-QNX-Native/tools/verify_frame_rate.py --seconds 20 --drive --label video-rate
+```
+
+测量在窗口起止直接读取 QNX 共享内存计数，以 Mac 单调时钟计时；若解码重启、HMI 退出或显示不再推进，报告标为无效，不会把解码率或请求值当成成功显示帧率。
+
 ## 验证与回退
 
 ```sh

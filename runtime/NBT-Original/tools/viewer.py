@@ -2,6 +2,7 @@
 """Loopback-only web display and original NBT controller session."""
 import http.server,json,threading,sys,time,subprocess
 from load_metrics import LoadMetrics
+import video_profile
 from pathlib import Path
 R=Path(__file__).resolve().parents[1]
 SOURCE=R.parent/'NBT-Dev/src/BMW-NBT-Emulator'
@@ -35,7 +36,7 @@ async function poll(){
    }
   }
  }catch{}
- setTimeout(poll,Math.max(4,33-(performance.now()-began)));
+ setTimeout(poll,Math.max(1,__FRAME_INTERVAL__-(performance.now()-began)));
 }
 async function pollStatus(){
  try{const s=await(await fetch('/status',{cache:'no-store'})).json();status.textContent=s.controller_ready?'已启动 · iDrive 按键已连接':s.frame_ready?'界面已启动 · 等待 iDrive 按键初始化':'原厂 QNX 正在启动…'}
@@ -43,7 +44,7 @@ async function pollStatus(){
  setTimeout(pollStatus,1000);
 }
 poll();pollStatus();</script>'''
-HTML=HTML.replace('</main><script>','__MONITOR_PANEL__</main><script>')
+HTML=HTML.replace('__FRAME_INTERVAL__',str(1000/video_profile.config()['target_fps'])).replace('</main><script>','__MONITOR_PANEL__</main><script>')
 class Handler(http.server.BaseHTTPRequestHandler):
  def log_message(self,*a):pass
  def respond(self,code,data=b'',kind='application/json',etag=None):

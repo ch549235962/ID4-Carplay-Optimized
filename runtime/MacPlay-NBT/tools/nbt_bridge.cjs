@@ -51,7 +51,7 @@ function state(){
 }
 function receiverState(){return {deviceName:'MacPlay · NBT',sessionActive:session,phone:phoneName,
  backend:'MacPlay '+connection+' -> QNX',nativeHidInput:true,nativeProtocolMigrated:false,
- display:{width:1280,height:480,fps:30},video:state()};}
+ display:{width:1280,height:480,fps:profile.fps},video:state()};}
 function save(){
  const report={mode:'MacPlay '+connection+' protocol -> compressed H.264 -> QNX decoder -> QNX HMI GLES',
   native_protocol_migrated:false,backend:'macplay-'+connection.toLowerCase(),pid:process.pid,decoder_ssh_pid:decoder?.pid??null,
@@ -115,7 +115,11 @@ function receiveFrame(value){
   if(!started&&!frame.keyframe){dropped++;dropWaitingKey++;requestKeyframe();return;}
   if(!started||frame.keyframe)decoder.stdin.write(config.annexB);
   decoder.stdin.write(frame.bytes);decoder.stdin.write(avc.AUD);
-  started=true;frames++;lastForwardAt=Date.now();bytes+=frame.bytes.length;if(frame.keyframe)keyframes++;lastError=null;
+  // Resuming a static screen starts a new active-input observation window.
+  // Old decode timestamps must not classify the first new frame as a stall.
+  const forwardedAt=Date.now();
+  if(forwardedAt-lastForwardAt>3000)decodedProgressAt=forwardedAt;
+  started=true;frames++;lastForwardAt=forwardedAt;bytes+=frame.bytes.length;if(frame.keyframe)keyframes++;lastError=null;
  }catch(e){lastError=e.message;started=false;requestKeyframe();save();}
 }
 function pollDecoded(){

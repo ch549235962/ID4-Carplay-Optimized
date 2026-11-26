@@ -14,6 +14,8 @@ test('decoder retry, fragmented readiness, static-screen guard and shutdown',asy
  for(let i=0;i<100;i++)bridge.receiveFrame(Buffer.from([1]));assert.equal(children.length,1);assert.equal(keys,1);
  now+=1500;timers[0]();assert.equal(children.length,2);children[1].stderr.emit('data',Buffer.from('QNX_NATIVE_DECODER_READY'));bridge.receiveFrame(Buffer.from([5]));
  now+=1500;timers[0]();now+=20000;timers[0]();assert.equal(children[1].kills,0,'static video must not cause recovery');
- bridge.receiveFrame(Buffer.from([5]));timers[0]();assert.equal(children[1].kills,1);assert.equal(bridge.state().decoder_recoveries,1);
- bridge.close();now+=60000;timers[0]();assert.equal(children.length,2,'shutdown must cancel automatic retries');
+ bridge.receiveFrame(Buffer.from([5]));timers[0]();assert.equal(children[1].kills,0,'resuming a static screen must allow decoding to progress');
+ for(let i=0;i<13;i++){now+=1000;bridge.receiveFrame(Buffer.from([1]));timers[0]();}
+ assert.equal(children[1].kills,1,'continuous input without decoded progress must still recover');assert.equal(bridge.state().decoder_recoveries,1);
+ const count=children.length;bridge.close();now+=60000;timers[0]();assert.equal(children.length,count,'shutdown must cancel automatic retries');
 });

@@ -14,6 +14,7 @@ INTENT=ROOT/'service-intent.json'
 SUPERVISOR=ROOT/'tools/supervisor.py'
 sys.path[:0]=[str(BASE/'CarPlay-QNX-Native/tools'),str(BASE/'NBT-Original/tools')]
 import nbt_guest,native_hid,nbt_vm
+import video_profile
 import wireless_profile
 from prepare_engine import prepare
 
@@ -65,9 +66,10 @@ def selected_mode():
     except FileNotFoundError:mode='usb'
     if mode not in ['usb','wireless']:raise RuntimeError('Invalid MacPlay transport mode')
     return mode
-def settings_for_mode(original,legacy,mode):
+def settings_for_mode(original,legacy,mode,fps=30):
     settings=dict(original)
-    settings.update(wireless=mode=='wireless',resolution='custom',width=1280,height=480,fps=30)
+    if type(fps)is not int or fps not in (30,60):raise RuntimeError('视频帧率只支持 30 或 60 FPS')
+    settings.update(wireless=mode=='wireless',resolution='custom',width=1280,height=480,fps=fps)
     if mode=='wireless':
         if not legacy.get('bt_address') or not legacy.get('wifi_ssid'):raise RuntimeError('请先配置测试 iPhone 的蓝牙地址和 Wi-Fi 名称。')
         bt=legacy['bt_address'].replace('-',':').lower()
@@ -141,7 +143,7 @@ def start(supervise=True):
     original=Path.home()/'Library/Application Support/MacPlay'
     legacy_file=BASE/'CarPlay-Wireless/config-private.json'
     legacy=json.loads(legacy_file.read_text()) if legacy_file.exists() else {}
-    settings=settings_for_mode(json.loads((original/'settings.json').read_text()),legacy,selected_mode())
+    settings=settings_for_mode(json.loads((original/'settings.json').read_text()),legacy,selected_mode(),video_profile.config()['target_fps'])
     if settings['wireless']:
         settings=wireless_profile.apply(settings,wireless_profile.snapshot())
     profile=ROOT/'settings-private.json';profile.write_text(json.dumps(settings,ensure_ascii=False,indent=2));profile.chmod(0o600)
