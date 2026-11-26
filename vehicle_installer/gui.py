@@ -170,8 +170,12 @@ def main():
             assert app.progress['value']==50
             from .remote import Remote
             import cryptography
+            import ssl,certifi
+            context=ssl.create_default_context(cafile=certifi.where())
+            assert context.cert_store_stats()['x509_ca']>0
             report={'ok':True,'app_version':VERSION,'platform':sys.platform,'python':sys.version.split()[0],
-                    'tk':window.tk.call('info','patchlevel'),'payload_version':load_lock()['version'],'network_used':False}
+                    'tk':window.tk.call('info','patchlevel'),'payload_version':load_lock()['version'],
+                    'bundled_ca_certificates':context.cert_store_stats()['x509_ca'],'network_used':False}
             if args.report:args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
         window.destroy();return
     App(window);window.mainloop()
