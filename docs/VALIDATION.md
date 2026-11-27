@@ -88,3 +88,5 @@
 JayJay 主分支已更新到 `3d1a4164e7b5`，两套本地源码均已快进同步。安装器 0.2.1 固定更新到上游预发布版 [v2026.11.26](https://github.com/JayJay3071/nbt-android-auto/releases/tag/v2026.11.26)，官方包 SHA-256：`2676a8057871463d28c8fe136ba17e34642247d9b37bbd86aa03453d4fd8430a`。新版本修复 USB 传输结束时的清理、配对记录密钥重复生成、蓝牙／USB 音频顺序，并更新仪表导航提示；新增 SSH 参考方法见[上游提交](https://github.com/JayJay3071/nbt-android-auto/commit/3d1a4164e7b58b519f65149d558fb72983a5e6e3)。
 
 MacPlay 最新发布仍为 1.2.4；原始 NBT 模拟器主分支仍为 `08279f65cdb6`，不重复覆盖。JayJay 更新用于其原生 USB CarPlay 载荷，没有把这些修复移植进 MacPlay 协议栈，也没有向实车写入或替换正在使用的模拟器显示桥接。此前版本表为 11 月 27 日的历史检查，不代表本次版本。
+
+本次安装器交付：macOS 0.2.1 原生构建、临时签名校验和打包后隐藏 GUI 自检通过（载荷 2026.11.26，未访问网络）；Windows x64 的[构建、测试及 EXE 自检](https://github.com/ch549235962/ID4-Carplay-Optimized/actions/runs/46062515308)全部通过。两份桌面程序均替换为 0.2.1，旧程序保留本地备份，官方 ZIP 已缓存并放入桌面安装器文件夹供离线选择。本次没有执行实车安装。
