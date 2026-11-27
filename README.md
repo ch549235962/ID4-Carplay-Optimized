@@ -39,6 +39,8 @@ flowchart LR
 
 2026-11-27 新增可回退的帧率实验配置，并修复静止画面恢复运动时误触发解码重启的问题。**60 FPS 尝试未通过稳定性验证，当前已恢复 30 FPS 请求及原先时钟／原生工具。** 实验中的约 30.49 FPS 只是短测，不能当作稳定性能。配置方法和测量边界分别见 [部署说明](docs/DEPLOYMENT.md#帧率配置与-60-fps-试验)与[验证记录](docs/VALIDATION.md#60-fps-尝试2026-11-27)。
 
+新增 [NBT 仪表电脑端配置工具（开发版）](vehicle_gauges/README.md)：读取并核对 VIN／ECU 身份、离线精确匹配及生成待验证任务包。首个候选为 2014 F20 N13；目前已验证实车配置为 0，尚无可刷写的温度表插件。
+
 ## 部署
 
 本仓库提供优化源码与部署脚本。运行需要已有的本地 NBT/QNX 开发环境、你有权使用的固件和 QNX SDK，以及 [MacPlay 1.2.4](https://github.com/Roylyl/MacPlay/releases/tag/V1.2.4)。完整步骤、现有目录要求和重建顺序见 [部署说明](docs/DEPLOYMENT.md)。
