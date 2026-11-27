@@ -9,7 +9,8 @@
     "tools/wireless_profile.py",
     "tools/bridge_recovery.test.cjs",
     "tools/verify_startup.py",
-    "tools/verify_recovery.py"
+    "tools/verify_recovery.py",
+    "tools/verify_stability.py"
   ],
   "NBT-Launcher": [
     "Launcher.m",
@@ -35,6 +36,7 @@
   ],
   "NBT-Original": [
     "tools/nbt_vm.py",
+    "tools/test_vm_lifecycle.py",
     "tools/video_profile.py",
     "tools/resources.py",
     "tools/viewer.py",

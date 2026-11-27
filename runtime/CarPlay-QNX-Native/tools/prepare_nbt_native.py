@@ -127,7 +127,7 @@ echo NBT_NATIVE_NETWORK_READY
             'native_tool_hashes':tool_hashes,
             'display_adapter_sha256':hashlib.sha256((ROOT/'build/libnative_overlay.so').read_bytes()).hexdigest(),
             'graphics_bridge_sha256':hashlib.sha256((ROOT/'build/libnbtgl.so').read_bytes()).hexdigest() if (ROOT/'build/libnbtgl.so').exists() else None,
-            'display_strategy':'QNX-owned presentation loop after stock display readiness, bounded physical YUV texture upload',
+            'display_strategy':'QNX-owned presentation batches bounded to 5 guest seconds, yielding to stock HMI heartbeat; bounded physical YUV texture upload',
             'original_hmi_preserved':True}
     (directory/'manifest.json').write_text(json.dumps(report,indent=2)+'\n')
     pub=(CROSS/'vm/qnx-runtime-config/ssh_host_rsa_key.pub').read_text().split()

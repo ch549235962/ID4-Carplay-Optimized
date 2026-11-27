@@ -31,6 +31,9 @@ def prepare():
         p.symlink_to(ROOT/'tools'/name)
     main=(SOURCE/'main.js').read_text()
     main=patch(main,'hevc: true, h264: true','hevc: false, h264: true')
+    # Original HMI initialization can exceed MacPlay's 45 s window. Keep the
+    # phone session while QNX boots instead of cycling the receiver mid-boot.
+    main=patch(main,'settings.fps >= 90 ? 25000 : 45000','120000')
     main=patch(main,'if (!stopping && !videoReady) {\n    disconnectReason = \'连接启动超时\';',
         'if (!stopping && !videoReady && settings.wireless) {\n    disconnectReason = \'连接启动超时\';')
     main=patch(main,'const settings = JSON.parse', '''const nbt = require('./nbt_bridge.cjs');

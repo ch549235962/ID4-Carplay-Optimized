@@ -99,10 +99,14 @@ def start():
     began=time.monotonic()
     emit(message='正在启动 NBT 虚拟机…')
     current = nbt_vm.status()
-    if macplay_backend() and not macplay_nbt.running() and current.get('qemu')=='running':
+    if macplay_backend() and current.get('qemu')=='running':
         guest=http_json('http://127.0.0.1:8876/metrics').get('guest') or {}
-        if guest.get('ram_valid') and time.time()-guest.get('received_at',0)<5 and guest.get('ram_free_bytes',0)<32*1024*1024:
-            emit(message='QNX 可用内存不足，正在按原配置重启虚拟机…')
+        fresh=guest.get('age_seconds',999)<5
+        hmi_stopped=fresh and guest.get('guest_ns',0)>60_000_000_000 and guest.get('hmi_threads')==0
+        low_memory=fresh and not macplay_nbt.running() and guest.get('ram_valid') and guest.get('ram_free_bytes',0)<32*1024*1024
+        if hmi_stopped or low_memory:
+            emit(message='HMI 已退出，正在恢复本地虚拟机…' if hmi_stopped else 'QNX 可用内存不足，正在按原配置重启虚拟机…')
+            macplay_nbt.stop()
             stop_video();quiet(nbt_vm.stop);current=nbt_vm.status()
     if not all([current.get('qemu') == 'running', current.get('renderer_running'), current.get('viewer_running')]):
         stop_video()

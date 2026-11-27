@@ -39,10 +39,19 @@ def owned_pid(name):
         return pid if expected in args else None
     except (OSError,ValueError,subprocess.CalledProcessError):return None
 
+def owned_qemu():
+    try:
+        pid=int((R/'vm/pid').read_text())
+        row=subprocess.check_output(['ps','-p',str(pid),'-o','uid=,args='],text=True).strip().split(None,1)
+        if len(row)==2 and int(row[0])==os.getuid() and row[1].startswith('/opt/homebrew/bin/qemu-system-i386 ') and '-name BMW-NBT-Original ' in row[1] and str(R/'vm/') in row[1]:return pid
+    except (OSError,ValueError,subprocess.CalledProcessError):pass
+    return None
+
 def status():
     result={'url':URL,'language_profile':selected_profile(),'qemu':'stopped','renderer_running':bool(owned_pid('renderer')),'viewer_running':bool(owned_pid('viewer'))}
     try:result['qemu']=qmp('query-status')['status']
-    except (OSError,ValueError,RuntimeError):pass
+    except (OSError,ValueError,RuntimeError):
+        if owned_qemu():result['qemu']='starting'
     if result['viewer_running']:
         try:
             with urllib.request.urlopen(URL+'/status',timeout=2) as f:result.update(json.load(f))
@@ -60,10 +69,13 @@ def stop():
     try:
         if qmp('query-name').get('name')!='BMW-NBT-Original':raise RuntimeError('QMP socket belongs to another VM')
         qmp('quit')
-    except (FileNotFoundError,ConnectionRefusedError):pass
+    except (OSError,ValueError):
+        # QEMU can be blocked accepting its graphics connection before QMP
+        # exists. A missing QMP socket does not mean that process has exited.
+        pid=owned_qemu()
+        if pid:os.kill(pid,signal.SIGTERM)
     for _ in range(50):
-        try:qmp('query-status')
-        except (OSError,ValueError):break
+        if not owned_qemu():break
         time.sleep(.1)
     else:raise RuntimeError('QEMU did not stop; RAM retained')
     for n in ['ram.bin','frame.ppm','renderer-metrics.json','boot-identity.json']:(R/'vm'/n).unlink(missing_ok=True)
@@ -105,7 +117,16 @@ def start():
     image=boot_image();info=image.stat()
     (R/'vm/boot-identity.json').write_text(json.dumps({'pid':child.pid,'image':str(image),
         'size':info.st_size,'mtime_ns':info.st_mtime_ns,'profile':selected_profile()}))
-    time.sleep(.5)
+    # Do not consume the bridge's sole connection with a TCP readiness probe.
+    # Its listener must exist before the renderer starts (a refused connect is
+    # not reliably retryable on the renderer's existing macOS socket).
+    deadline=time.monotonic()+8
+    while True:
+        if child.poll() is not None:raise RuntimeError('QEMU exited; inspect logs/qemu.log')
+        listener=subprocess.run(['/usr/sbin/lsof','-a','-p',str(child.pid),'-iTCP:27871','-sTCP:LISTEN','-t'],capture_output=True,text=True,timeout=2)
+        if listener.returncode==0:break
+        if time.monotonic()>=deadline:raise RuntimeError('QEMU graphics listener did not become ready')
+        time.sleep(.02)
     env=os.environ.copy();env.update({'DYLD_LIBRARY_PATH':str(R/'renderer/lib'),'GLHOST_QEMU_PORT':'27871','GLHOST_ANGLE_BACKEND':'metal',
         'GLHOST_DMA_CONFIG':str(R/'vm/ram.bin'),'MHI2_SHADER_CACHE':str(R.parent/'NBT-Dev/src/BMW-NBT-Emulator/work/graphics-port/host/shader-cache'),
         'MHI2_GL_FRAME':str(R/'vm/frame.ppm'),'GLHOST_RAM_BYTES':str(ram_bytes),'GLHOST_METRICS_FILE':str(R/'vm/renderer-metrics.json')})

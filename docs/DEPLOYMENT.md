@@ -42,6 +42,7 @@ python3 /path/to/outputs/NBT-Launcher/build.py
 - 连接 iPhone USB 数据线，双击桌面“NBT CarPlay 启动器”。接收服务先开启，QNX 继续初始化。
 - 网页由“打开 NBT 网页”和“打开 CarPlay 状态页”两个按钮手动打开。
 - “重新连接 CarPlay”重启接收端并保留虚拟机；“全部停止”同时关闭监护和所有项目服务。
+- “开启”还会检查新鲜的 QNX 状态；若启动已超过 60 秒 QNX 时间且确认 HMI 线程为 0，会重启本地 VM 恢复。正在正常初始化或状态过旧时，不据此重启。
 - 关闭控制台窗口会保留后台服务。
 - 不要同时启动独立 MacPlay 接收端和本项目接收端。
 
@@ -93,11 +94,20 @@ python3 /path/to/outputs/CarPlay-QNX-Native/tools/verify_frame_rate.py --seconds
 
 ```sh
 node --test runtime/MacPlay-NBT/tools/avc.test.cjs runtime/MacPlay-NBT/tools/bridge_recovery.test.cjs
+python3 runtime/NBT-Original/tools/test_vm_lifecycle.py
 python3 /path/to/outputs/MacPlay-NBT/tools/verify_startup.py --cold
 python3 /path/to/outputs/MacPlay-NBT/tools/verify_recovery.py
 python3 /path/to/outputs/CarPlay-QNX-Native/tools/verify_display_performance.py
 ```
 
-后面三项是有实际副作用的本地验收：会重启测试 VM、终止本项目拥有的视频/接收进程，或发送成对旋钮动作。不要在需要保持当前手机会话的时刻执行。
+上述启动、恢复和显示验收有实际副作用：会重启测试 VM、终止本项目拥有的视频/接收进程，或发送成对旋钮动作。不要在需要保持当前手机会话的时刻执行。
+
+持续稳定性检查（先让手机和 HMI 就绪）：
+
+```sh
+python3 /path/to/outputs/MacPlay-NBT/tools/verify_stability.py --seconds 300 --guest-seconds 240 --drive
+```
+
+该检查不重启服务、不打开网页；每 15 秒发送一组成对旋钮动作。它同时要求至少 300 秒电脑时间和 240 秒 QNX 时间，跨过此前 HMI 心跳故障窗口。报告保存在本地 `MacPlay-NBT/logs/startup-stability-soak.json`，包含新鲜度延迟计数、HMI／会话是否保留和原厂看门狗的新增超时数。连续 30 秒没有新鲜 HMI 状态会失败，较短延迟单独记录；这与逐样本要求低于 5 秒的严格检查不同。
 
 回退时先点“全部停止”，从工作区 `.id4-backups/` 恢复被覆盖的源码，使用你保留的原启动镜像及原渲染器。这里的性能与调度调整仅用于模拟器，不要直接复制到真实车机。真实 NBT 重启按上游 ZGW 流程操作，不运行 `/sbin/shutdown`。

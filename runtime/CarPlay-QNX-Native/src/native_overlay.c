@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <time.h>
 #include "native_video.h"
 
 struct attribute { GLint size; GLenum type; GLboolean norm; GLsizei stride; const void *ptr; GLuint buffer; int set,enabled; };
@@ -174,7 +175,9 @@ int eglSwapBuffers(void *display,void *surface){
      * Returning to the stock scene between every video frame limits video to
      * the very slow emulated HMI scene rate. The hide flag immediately releases
      * this loop and resumes ordinary HMI rendering on the same context/thread.
-     * Every draw restores HMI GL state; no second thread touches its context. */
+     * Every draw restores HMI GL state; no second thread touches its context.
+     * Return regularly: the caller also services the stock HMI heartbeat.
+     * An unbounded pump causes the stock watchdog to terminate HmiMain3D. */
     int pump_ready=painted&&result&&stock_display_ready();
     int policy=0,priority_changed=0;struct sched_param saved_priority;
     /* SSH starts the decoder at priority 16; stock HMI rendering is priority
@@ -188,7 +191,13 @@ int eglSwapBuffers(void *display,void *surface){
             priority_changed=!pthread_setschedparam(pthread_self(),policy,&video_priority);
         }
     }
-    while(pump_ready&&result&&!access("/var/tmp/nbt-native/show-video",F_OK)){
+    struct timespec began,now;
+    int clock_ok=!clock_gettime(CLOCK_MONOTONIC,&began);
+    unsigned polls=0;
+    while(pump_ready&&result&&polls++<5000&&!access("/var/tmp/nbt-native/show-video",F_OK)){
+        if(!clock_ok||clock_gettime(CLOCK_MONOTONIC,&now))break;
+        int64_t elapsed=(int64_t)(now.tv_sec-began.tv_sec)*1000000000LL+now.tv_nsec-began.tv_nsec;
+        if(elapsed>=5000000000LL)break;
         if(draw(1)){
             result=next(display,surface);
             if(result)shared->rendered++;
@@ -196,5 +205,9 @@ int eglSwapBuffers(void *display,void *surface){
         usleep(1000);
     }
     if(priority_changed)pthread_setschedparam(pthread_self(),policy,&saved_priority);
+    if(pump_ready){
+        static unsigned yields;
+        if(++yields<=3||yields%300==0)fprintf(stderr,"QNX_NATIVE_PUMP_YIELD count=%u\n",yields);
+    }
     return result;
 }
