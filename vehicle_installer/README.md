@@ -6,7 +6,7 @@ macOS 和 Windows 中文桌面程序，用 ENET / SSH 给**原始 HU_NBT（QNX 6
 
 ## 下载与使用
 
-在 [v0.2.0 发布页](https://github.com/ch549235962/ID4-Carplay-Optimized/releases/tag/v0.2.0) 下载：
+当前源码为 0.2.1，固定上游预发布版 v2026.11.26。Windows 最新构建见 [GitHub Actions](https://github.com/ch549235962/ID4-Carplay-Optimized/actions/workflows/build-vehicle-installer.yml)。旧版 0.2.0 仍可在 [v0.2.0 发布页](https://github.com/ch549235962/ID4-Carplay-Optimized/releases/tag/v0.2.0) 下载：
 
 | 电脑 | 文件 |
 |---|---|
@@ -23,7 +23,9 @@ macOS 和 Windows 中文桌面程序，用 ENET / SSH 给**原始 HU_NBT（QNX 6
 
 两个平台的程序都未做商业发行签名或公证。Mac 使用临时签名；首次打开时系统可能拦截，可按 macOS 的“隐私与安全性”提示处理该应用。Windows 也可能显示未知发布者。不要全局关闭系统安全保护。发布页提供 SHA-256 校验值和源码。
 
-首次安装需要电脑联网下载约 2 MB 的固定官方 ZIP；电脑直连 ENET 后若无互联网，可以提前下载 [JayJay 官方 v2026.11.24.2](https://github.com/JayJay3071/nbt-android-auto/releases/tag/v2026.11.24.2)，在高级选项选择 `NBT-AndroidAuto-Python-2026.11.24.2.zip`。其他版本不会通过校验。
+首次安装需要电脑联网下载约 2 MB 的固定官方 ZIP；电脑直连 ENET 后若无互联网，可以提前下载 [JayJay 官方 v2026.11.26](https://github.com/JayJay3071/nbt-android-auto/releases/tag/v2026.11.26)，在高级选项选择 `NBT-AndroidAuto-Python-2026.11.26.zip`。其他版本不会通过校验。
+
+新版已包含上游的 USB 断开清理、配对记录持久化及蓝牙／USB 音频顺序修复；上游的首次配对优化仍标注未经实车验证。SSH 开通的补充参考见[上游说明](https://github.com/JayJay3071/nbt-android-auto/blob/3d1a4164e7b58b519f65149d558fb72983a5e6e3/README.md#ssh)。
 
 安装完成后，按上游说明连接 iPhone 到车辆 USB，允许信任和 CarPlay；首次可能需要 2–3 分钟。这里没有承诺增加原主机不具备的无线 CarPlay 能力，也不更改车辆蓝牙固件。
 
@@ -37,10 +39,10 @@ macOS 和 Windows 中文桌面程序，用 ENET / SSH 给**原始 HU_NBT（QNX 6
 /var/opt/hmi/data/rw/.ID4CarPlayInstaller
 ```
 
-固定上游版本 `v2026.11.24.2`，官方 ZIP SHA-256：
+固定上游版本 `v2026.11.26`，官方 ZIP SHA-256：
 
 ```text
-d5017d1224acc8f7c95308566ea4c35ed91d98479584df638ac2be8b1acb9709
+2676a8057871463d28c8fe136ba17e34642247d9b37bbd86aa03453d4fd8430a
 ```
 
 安装器验证整个 ZIP 和清单中 27 个文件的内容、目标路径、大小及权限。官方二进制在运行时从 JayJay 发布页下载，没有放入本仓库或我们的应用包。

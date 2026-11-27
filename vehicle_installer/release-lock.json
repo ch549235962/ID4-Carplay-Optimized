@@ -1,10 +1,10 @@
 {
   "repository": "JayJay3071/nbt-android-auto",
-  "release": "v2026.11.24.2",
-  "version": "2026.11.24.2",
-  "asset": "NBT-AndroidAuto-Python-2026.11.24.2.zip",
-  "sha256": "d5017d1224acc8f7c95308566ea4c35ed91d98479584df638ac2be8b1acb9709",
-  "url": "https://github.com/JayJay3071/nbt-android-auto/releases/download/v2026.11.24.2/NBT-AndroidAuto-Python-2026.11.24.2.zip",
+  "release": "v2026.11.26",
+  "version": "2026.11.26",
+  "asset": "NBT-AndroidAuto-Python-2026.11.26.zip",
+  "sha256": "2676a8057871463d28c8fe136ba17e34642247d9b37bbd86aa03453d4fd8430a",
+  "url": "https://github.com/JayJay3071/nbt-android-auto/releases/download/v2026.11.26/NBT-AndroidAuto-Python-2026.11.26.zip",
   "files": [
     {
       "source": "rt/native_service",
@@ -45,8 +45,8 @@
       "source": "rt/nbt_cluster",
       "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_cluster",
       "mode": "700",
-      "size": 104188,
-      "sha256": "4e26f7da8b3a6f8206ccd057ec09c3521e4a353cff77adbc2032802199f9a79f"
+      "size": 103917,
+      "sha256": "6f30998e82f2e79affd9a5c0fdebef491a39924832bc278a91c46d181ce5416a"
     },
     {
       "source": "rt/accessory_window",
@@ -87,8 +87,8 @@
       "source": "rt/boot.sh",
       "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/boot.sh",
       "mode": "700",
-      "size": 12789,
-      "sha256": "93d74ad37e5a5c549c00519e35ad64256b760aa5affc7c977011c8b20923a009"
+      "size": 13310,
+      "sha256": "92fb6c4b642e12aa3808490fb811098518064dc8bfd4d4ae74d7c7a605188a9d"
     },
     {
       "source": "rt/restart.sh",
@@ -101,15 +101,15 @@
       "source": "rt/nbt_aa_wms",
       "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_aa_wms",
       "mode": "700",
-      "size": 18543,
-      "sha256": "9311c792576c449b95332ba02a4af7417ca359fad60dd66128da848f26b49006"
+      "size": 21683,
+      "sha256": "fc12aa5f8096831e05bb361302c0b7c8f5fecdbab95f2fcab303223f4fffeb2e"
     },
     {
       "source": "rt/nbt_ipod_tap",
       "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_ipod_tap",
       "mode": "700",
-      "size": 27828,
-      "sha256": "5612333325dedcd0ac0fc400ff4b133b2e164d968662f31e7bc3660b0813d829"
+      "size": 28936,
+      "sha256": "eb2434730ef952ca9560b6493f4dfcd37fa328bf37889149347d1a5253f73d65"
     },
     {
       "source": "rt/nbt_aa_ipod",
@@ -122,8 +122,8 @@
       "source": "rt/iap.sh",
       "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/iap.sh",
       "mode": "700",
-      "size": 2904,
-      "sha256": "b6e68ec609bbce8531f3660920c097129c3ccad14ef1a42fbf9f2dd9c9c172a5"
+      "size": 3565,
+      "sha256": "3dc3e26a608872af77e039912bd78c7673a375a5cdf52e8181c8ed1d7b054d11"
     },
     {
       "source": "rt/nbt_decoder",
@@ -136,8 +136,8 @@
       "source": "rt/nbt_carplay",
       "target": "/var/opt/hmi/data/rw/NbtAndroidAutoRT/nbt_carplay",
       "mode": "700",
-      "size": 1141753,
-      "sha256": "251e9a706da57f68fbf8354c1265fc32ff3a5250f7b9523b365249643bed4b4d"
+      "size": 1144579,
+      "sha256": "eabcd661856ae53f82835c5fba0429ea2489f441a68fe7070f7200a1b94836db"
     },
     {
       "source": "rt/nbt_reset",
@@ -179,7 +179,7 @@
       "target": "/var/opt/hmi/data/rw/Plugins/NbtAndroidAuto/NbtAndroidAuto_ALL_Texts.zip",
       "mode": "644",
       "size": 4189,
-      "sha256": "531ab8fff9d63e09dcea454099a6a5b015150f25bc96fe95f6f3e5fe39cee5fb"
+      "sha256": "7b978719808f42bc55eec89495342eb97e9d224b033928ca6ce3d531ec1ef256"
     },
     {
       "source": "plugin/NbtAndroidAuto_ALL_Images.zip",

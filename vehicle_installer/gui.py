@@ -13,7 +13,7 @@ from tkinter import ttk, messagebox, filedialog
 from .engine import Installer
 from .payload import data_directory, load_lock, InstallError
 
-VERSION = '0.2.0'
+VERSION = '0.2.1'
 
 
 class App:
@@ -165,7 +165,7 @@ def main():
             app=App(window,Path(temp))
             app.toggle_advanced();app.toggle_advanced();window.update_idletasks()
             assert app.host.get()=='169.254.199.99' and app.install_button['text']=='一键安装并重启'
-            assert load_lock()['version']=='2026.11.24.2'
+            assert load_lock()['version']=='2026.11.26'
             app.events.put(('progress','自检',.5));app.drain()
             assert app.progress['value']==50
             from .remote import Remote

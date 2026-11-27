@@ -44,7 +44,7 @@ def main():
         import plistlib
         app=ROOT/'dist'/(NAME+'.app');file=app/'Contents'/'Info.plist'
         with file.open('rb') as input:plist=plistlib.load(input)
-        plist.update(CFBundleShortVersionString='0.2.0',CFBundleVersion='2',
+        plist.update(CFBundleShortVersionString='0.2.1',CFBundleVersion='3',
                      NSLocalNetworkUsageDescription='通过 ENET 连接您的 BMW NBT，安装和备份 CarPlay 插件。',
                      NSHighResolutionCapable=True)
         # Homebrew's current Tcl build can require the host major macOS release.
