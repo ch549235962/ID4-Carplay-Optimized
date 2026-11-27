@@ -6,7 +6,7 @@ macOS 和 Windows 中文桌面程序，用 ENET / SSH 给**原始 HU_NBT（QNX 6
 
 ## 下载与使用
 
-当前源码为 0.2.2，固定上游预发布版 v2026.11.26。Windows 最新构建见 [GitHub Actions](https://github.com/ch549235962/ID4-Carplay-Optimized/actions/workflows/build-vehicle-installer.yml)。旧版 0.2.0 仍可在 [v0.2.0 发布页](https://github.com/ch549235962/ID4-Carplay-Optimized/releases/tag/v0.2.0) 下载：
+当前源码为 0.2.1，固定上游预发布版 v2026.11.26。Windows 最新构建见 [GitHub Actions](https://github.com/ch549235962/ID4-Carplay-Optimized/actions/workflows/build-vehicle-installer.yml)。旧版 0.2.0 仍可在 [v0.2.0 发布页](https://github.com/ch549235962/ID4-Carplay-Optimized/releases/tag/v0.2.0) 下载：
 
 | 电脑 | 文件 |
 |---|---|
@@ -94,7 +94,3 @@ python -m vehicle_installer --self-test --report selftest.json
 ```
 
 该自检只创建隐藏 GUI、验证依赖和包内清单，不连接车辆。测试范围与尚未验证的部分见 [VALIDATION.md](VALIDATION.md)。
-
-## 仪表配置开发工具
-
-0.2.2 新增“仪表配置（开发版）”入口，也支持 `--gauges` 单独打开。仅从电脑读取 VIN 和 ECU 身份、离线生成待验证任务包；不执行仪表刷写。首个候选为 2014 F20 N13，当前实车验证配置数为 0。用法与边界见[工具说明](../vehicle_gauges/README.md)。

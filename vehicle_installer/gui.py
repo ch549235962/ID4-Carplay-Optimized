@@ -12,9 +12,8 @@ from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
 from .engine import Installer
 from .payload import data_directory, load_lock, InstallError
-from vehicle_gauges.gui import GaugeWindow
 
-VERSION = '0.2.2'
+VERSION = '0.2.1'
 
 
 class App:
@@ -48,8 +47,6 @@ class App:
         row=ttk.Frame(frame);row.pack(fill='x')
         for text,command in [('只检查连接',lambda:self.start('check')),('高级选项',self.toggle_advanced),('打开备份 / 日志',self.open_data)]:
             button=ttk.Button(row,text=text,command=command);button.pack(side='left',padx=(0,8));self.inputs.append(button)
-        gauges = ttk.Button(row, text='仪表配置（开发版）', command=lambda: GaugeWindow(tk.Toplevel(self.window)))
-        gauges.pack(side='left'); self.inputs.append(gauges)
         self.advanced=ttk.Frame(frame,padding=(0,12))
         self.advanced.columnconfigure(1,weight=1)
         for i,(label,var) in enumerate([('SSH 端口',self.port),('车辆网关（留空自动找）',self.gateway)]):
@@ -160,7 +157,6 @@ def main():
     import argparse
     import tempfile
     parser=argparse.ArgumentParser();parser.add_argument('--self-test',action='store_true');parser.add_argument('--report',type=Path)
-    parser.add_argument('--gauges', action='store_true')
     args=parser.parse_args()
     window=tk.Tk()
     if args.self_test:
@@ -170,10 +166,6 @@ def main():
             app.toggle_advanced();app.toggle_advanced();window.update_idletasks()
             assert app.host.get()=='169.254.199.99' and app.install_button['text']=='一键安装并重启'
             assert load_lock()['version']=='2026.11.26'
-            gauges_window = tk.Toplevel(window)
-            gauge_app = GaugeWindow(gauges_window)
-            assert gauge_app.report is None and str(gauge_app.export_button['state']) == 'disabled'
-            gauges_window.destroy()
             app.events.put(('progress','自检',.5));app.drain()
             assert app.progress['value']==50
             from .remote import Remote
@@ -184,9 +176,6 @@ def main():
             report={'ok':True,'app_version':VERSION,'platform':sys.platform,'python':sys.version.split()[0],
                     'tk':window.tk.call('info','patchlevel'),'payload_version':load_lock()['version'],
                     'bundled_ca_certificates':context.cert_store_stats()['x509_ca'],'network_used':False}
-            report['gauge_identification_window'] = True
             if args.report:args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
         window.destroy();return
-    if args.gauges: GaugeWindow(window)
-    else: App(window)
-    window.mainloop()
+    App(window);window.mainloop()
